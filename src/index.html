@@ -7,34 +7,69 @@
     <style>
         body {
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
             background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
         }
         canvas {
             background-color: #000;
         }
+        .controls {
+            margin: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .score {
+            font-size: 24px;
+            margin: 10px;
+        }
     </style>
 </head>
 <body>
+    <div class="controls">
+        <button id="startButton">Start</button>
+        <button id="restartButton">Restart</button>
+        <div class="score">Score: <span id="score">0</span></div>
+    </div>
     <canvas id="gameCanvas" width="400" height="400"></canvas>
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+        const startButton = document.getElementById('startButton');
+        const restartButton = document.getElementById('restartButton');
+        const scoreDisplay = document.getElementById('score');
 
         const box = 20;
-        let snake = [];
-        snake[0] = { x: 9 * box, y: 10 * box };
-        let food = {
-            x: Math.floor(Math.random() * 19 + 1) * box,
-            y: Math.floor(Math.random() * 19 + 1) * box
-        };
-        let score = 0;
+        let snake;
+        let food;
+        let score;
         let d;
+        let game;
 
-        document.addEventListener('keydown', direction);
+        function init() {
+            snake = [{ x: 9 * box, y: 10 * box }];
+            food = {
+                x: Math.floor(Math.random() * 19 + 1) * box,
+                y: Math.floor(Math.random() * 19 + 1) * box
+            };
+            score = 0;
+            d = null;
+            scoreDisplay.textContent = score;
+            clearInterval(game);
+        }
+
+        function startGame() {
+            init();
+            game = setInterval(draw, 100);
+        }
 
         function direction(event) {
             if (event.keyCode == 37 && d != 'RIGHT') d = 'LEFT';
@@ -76,6 +111,7 @@
 
             if (snakeX == food.x && snakeY == food.y) {
                 score++;
+                scoreDisplay.textContent = score;
                 food = {
                     x: Math.floor(Math.random() * 19 + 1) * box,
                     y: Math.floor(Math.random() * 19 + 1) * box
@@ -84,23 +120,20 @@
                 snake.pop();
             }
 
-            let newHead = {
-                x: snakeX,
-                y: snakeY
-            };
+            let newHead = { x: snakeX, y: snakeY };
 
             if (snakeX < 0 || snakeX >= 20 * box || snakeY < 0 || snakeY >= 20 * box || collision(newHead, snake)) {
                 clearInterval(game);
             }
 
             snake.unshift(newHead);
-
-            ctx.fillStyle = 'white';
-            ctx.font = '45px Changa one';
-            ctx.fillText(score, 2 * box, 1.6 * box);
         }
 
-        let game = setInterval(draw, 100);
+        document.addEventListener('keydown', direction);
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', startGame);
+
+        init();
     </script>
 </body>
 </html>
